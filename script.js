@@ -1,159 +1,158 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+const menu = document.getElementById("menu");
+const gameOverUI = document.getElementById("gameOverUI");
+const hpFill = document.getElementById("hpFill");
+const info = document.getElementById("info");
+
+const joystick = document.getElementById("joystick");
+const stick = document.getElementById("stick");
+
 canvas.width = 400;
 canvas.height = 600;
 
-const menu = document.getElementById("menu");
-const gameOverUI = document.getElementById("gameOverUI");
-
-const stats = document.getElementById("stats");
-const hpFill = document.getElementById("hpFill");
-
-const shootSound = document.getElementById("shootSound");
-const boomSound = document.getElementById("boomSound");
-
+/* STATE */
 let player, bullets, enemies;
-let score, level, gameRunning;
-let shake = 0;
+let gameState = "menu";
+let score = 0;
 
-/* INIT */
-function startGame() {
+/* JOYSTICK */
+let joyX = 0;
+
+/* ENEMY VARIATION */
+const enemyTypes = [
+  {emoji:"👾", speed:2},
+  {emoji:"👽", speed:3},
+  {emoji:"🤖", speed:1.5},
+  {emoji:"🛸", speed:2.5}
+];
+
+/* START */
+function startGame(){
   menu.style.display = "none";
   canvas.style.display = "block";
-  gameOverUI.classList.add("hidden");
+  joystick.style.display = "block";
 
-  player = { x: 200, y: 520, hp: 5 };
+  resetGame();
+}
+
+/* RESET */
+function resetGame(){
+  player = {x:200,y:520,hp:5};
   bullets = [];
   enemies = [];
-
   score = 0;
-  level = 1;
-  gameRunning = true;
+  gameState = "play";
 
   shootLoop();
-  gameLoop();
+  loop();
 }
 
 /* RESTART */
-function restartGame() {
-  startGame();
+function restartGame(){
+  resetGame();
+  gameOverUI.classList.add("hidden");
 }
 
-/* SOUND */
-function playShoot() {
-  shootSound.currentTime = 0;
-  shootSound.play().catch(()=>{});
-}
+/* JOYSTICK */
+joystick.addEventListener("touchmove",(e)=>{
+  if(gameState !== "play") return;
 
-function playBoom() {
-  boomSound.currentTime = 0;
-  boomSound.play().catch(()=>{});
-}
+  e.preventDefault();
+
+  let r = joystick.getBoundingClientRect();
+  let x = e.touches[0].clientX - r.left - 60;
+
+  if(x > 40) x = 40;
+  if(x < -40) x = -40;
+
+  joyX = x;
+
+  stick.style.transform = `translate(${x}px,0px)`;
+},{passive:false});
 
 /* SHOOT */
-function shootLoop() {
-  if (!gameRunning) return;
+function shootLoop(){
+  if(gameState !== "play") return;
 
-  bullets.push({ x: player.x, y: player.y });
-  playShoot();
-
-  setTimeout(shootLoop, 300);
+  bullets.push({x:player.x,y:player.y});
+  setTimeout(shootLoop,250);
 }
 
-/* INPUT */
-canvas.addEventListener("mousemove", e => {
-  let r = canvas.getBoundingClientRect();
-  player.x = e.clientX - r.left;
-});
+/* ENEMY SPAWN (FIX VARIASI) */
+setInterval(()=>{
+  if(gameState !== "play") return;
 
-/* ENEMY SPAWN */
-setInterval(() => {
-  if (!gameRunning) return;
+  let t = enemyTypes[Math.floor(Math.random()*enemyTypes.length)];
 
   enemies.push({
-    x: Math.random() * 380,
+    x: Math.random()*380,
     y: -20,
-    speed: 2 + level * 0.2,
-    dir: Math.random() > 0.5 ? 1 : -1
+    speed: t.speed,
+    emoji: t.emoji,
+    dir: Math.random()>0.5?1:-1
   });
 
-}, 700);
-
-/* SHAKE */
-function addShake() {
-  shake = 10;
-}
+},600);
 
 /* LOOP */
-function gameLoop() {
-  if (!gameRunning) return;
+function loop(){
+  if(gameState !== "play") return;
 
-  ctx.clearRect(0, 0, 400, 600);
+  ctx.clearRect(0,0,400,600);
 
-  /* shake effect */
-  let offsetX = shake ? (Math.random() - 0.5) * shake : 0;
-  let offsetY = shake ? (Math.random() - 0.5) * shake : 0;
+  /* PLAYER MOVE */
+  player.x += joyX * 0.15;
+  if(player.x < 20) player.x = 20;
+  if(player.x > 380) player.x = 380;
 
-  ctx.save();
-  ctx.translate(offsetX, offsetY);
-
-  /* player */
+  /* PLAYER */
   ctx.font = "30px Arial";
   ctx.fillText("😎", player.x, player.y);
 
-  /* bullets */
+  /* BULLET */
   bullets.forEach((b,i)=>{
     b.y -= 6;
     ctx.fillText("🏐", b.x, b.y);
-    if (b.y < 0) bullets.splice(i,1);
+    if(b.y < 0) bullets.splice(i,1);
   });
 
-  /* enemies AI (zigzag) */
-  enemies.forEach((e, ei)=>{
+  /* ENEMY */
+  enemies.forEach((e,ei)=>{
     e.y += e.speed;
     e.x += e.dir * 2;
 
-    if (e.x < 0 || e.x > 400) e.dir *= -1;
+    ctx.font = "28px Arial";
+    ctx.fillText(e.emoji, e.x, e.y);
 
-    ctx.fillText("👾", e.x, e.y);
-
-    /* hit player */
-    if (Math.abs(e.x - player.x) < 20 && Math.abs(e.y - player.y) < 20) {
+    /* HIT PLAYER */
+    if(Math.abs(e.x-player.x)<20 && Math.abs(e.y-player.y)<20){
       enemies.splice(ei,1);
       player.hp--;
-      playBoom();
-      addShake();
 
-      if (player.hp <= 0) endGame();
+      if(player.hp <= 0) endGame();
     }
 
-    /* hit bullet */
-    bullets.forEach((b, bi)=>{
-      if (Math.abs(b.x - e.x) < 20 && Math.abs(b.y - e.y) < 20) {
+    /* HIT BULLET */
+    bullets.forEach((b,bi)=>{
+      if(Math.abs(b.x-e.x)<20 && Math.abs(b.y-e.y)<20){
         enemies.splice(ei,1);
         bullets.splice(bi,1);
         score++;
-        playBoom();
       }
     });
   });
 
-  ctx.restore();
-
   /* UI */
-  stats.innerText = `Score: ${score} | Level: ${level}`;
+  hpFill.style.width = (player.hp/5)*100 + "%";
+  info.innerText = "Score: " + score;
 
-  hpFill.style.width = (player.hp / 5) * 100 + "%";
-  hpFill.style.background = player.hp > 2 ? "lime" : "red";
-
-  shake *= 0.9;
-
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(loop);
 }
 
 /* GAME OVER */
-function endGame() {
-  gameRunning = false;
+function endGame(){
+  gameState = "gameover";
   gameOverUI.classList.remove("hidden");
 }
