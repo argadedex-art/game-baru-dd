@@ -1,104 +1,88 @@
-html, body {
+/* ===== RESET ===== */
+* {
   margin: 0;
   padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  touch-action: none;
-  font-family: Arial;
-  background: radial-gradient(circle at top, #0f2027, #000);
-  color: white;
+  box-sizing: border-box;
 }
 
-/* CENTER */
+/* ===== BODY ===== */
 body {
+  height: 100vh;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+
+  /* FIX WARNA PUTIH BUG */
+  background: radial-gradient(circle at top, #1b2735, #000);
+  color: white;
+
   display: flex;
   justify-content: center;
   align-items: center;
+
+  touch-action: none;
 }
 
-/* MENU */
+/* ===== CANVAS ===== */
+canvas {
+  width: 320px;
+  height: 400px;
+
+  background: #111;
+
+  border: 2px solid #00eaff;
+  border-radius: 12px;
+
+  display: none; /* penting: muncul saat start */
+}
+
+/* ===== MENU ===== */
 #menu {
   position: absolute;
-  width: 100%;
   text-align: center;
-  top: 50%;
-  transform: translateY(-50%);
 }
 
-/* GAME OVER */
-#gameOverUI {
-  position: absolute;
-  width: 100%;
-  text-align: center;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* CANVAS */
-canvas {
-  display: none;
-  width: min(100vw, 400px);
-  height: min(100vh, 600px);
-  background: black;
-  border: 2px solid #00eaff;
-  border-radius: 10px;
-}
-
-/* HUD */
-#hud {
-  position: absolute;
-  top: 10px;
-  width: 100%;
-  text-align: center;
-  pointer-events: none;
-}
-
-#hpBar {
-  width: 200px;
-  height: 10px;
-  background: #333;
-  margin: auto;
-  border-radius: 5px;
-}
-
-#hpFill {
-  width: 100%;
-  height: 100%;
-  background: lime;
+#menu h1 {
+  font-size: 28px;
+  color: #00eaff;
+  margin-bottom: 20px;
 }
 
 /* BUTTON */
 button {
   padding: 12px 20px;
+  font-size: 16px;
+
+  background: #00eaff;
+  color: #000;
+
   border: none;
-  background: #00eaff;
   border-radius: 10px;
-  font-weight: bold;
+
+  cursor: pointer;
 }
 
-/* JOYSTICK */
-#joystick {
+/* ===== HUD ===== */
+#hud {
   position: absolute;
-  bottom: 40px;
-  left: 40px;
-  width: 120px;
-  height: 120px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 50%;
+  top: 10px;
+
+  width: 100%;
+  text-align: center;
+
+  font-size: 18px;
+
   display: none;
 }
 
-#stick {
+/* ===== GAME OVER ===== */
+#gameOver {
   position: absolute;
-  width: 50px;
-  height: 50px;
-  background: #00eaff;
-  border-radius: 50%;
-  top: 35px;
-  left: 35px;
+  text-align: center;
+
+  display: none;
 }
 
-.hidden {
-  display: none;
+#gameOver h1 {
+  margin-bottom: 10px;
+  color: red;
 }
