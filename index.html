@@ -2,35 +2,34 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Space Shooter PRO</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Space Shooter Clean</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div id="menu">
-  <h1>🚀 SPACE SHOOTER PRO</h1>
-  <p>Tap / Click untuk mulai</p>
+  <h1>🚀 SPACE SHOOTER</h1>
   <button onclick="startGame()">START</button>
 </div>
 
 <div id="hud">
-  <div id="stats"></div>
+  <div id="info"></div>
   <div id="hpBar"><div id="hpFill"></div></div>
 </div>
 
 <canvas id="gameCanvas"></canvas>
 
-<div id="gameOverUI" class="hidden">
-  <h1>GAME OVER</h1>
-  <button onclick="restartGame()">RESTART</button>
+<!-- JOYSTICK -->
+<div id="joystick">
+  <div id="stick"></div>
 </div>
 
-<!-- SOUND -->
-<audio id="shootSound" src="https://assets.mixkit.co/sfx/preview/mixkit-laser-weapon-shot-1681.mp3"></audio>
-<audio id="boomSound" src="https://assets.mixkit.co/sfx/preview/mixkit-explosion-impact-1684.mp3"></audio>
+<div id="gameOverUI" class="hidden">
+  <h1>💀 GAME OVER</h1>
+  <button onclick="restartGame()">RESTART</button>
+</div>
 
 <script src="script.js"></script>
 
