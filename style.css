@@ -1,0 +1,74 @@
+body {
+  margin: 0;
+  font-family: Arial;
+  background: radial-gradient(circle at top, #0f2027, #000);
+  color: white;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* MENU */
+#menu {
+  margin-top: 20vh;
+}
+
+/* HUD */
+#hud {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  text-align: center;
+  pointer-events: none;
+}
+
+#stats {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+/* HP BAR */
+#hpBar {
+  width: 200px;
+  height: 10px;
+  background: #333;
+  margin: auto;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+#hpFill {
+  height: 100%;
+  width: 100%;
+  background: lime;
+  transition: 0.2s;
+}
+
+/* CANVAS */
+canvas {
+  display: none;
+  margin: auto;
+  background: black;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 2/3;
+  border: 2px solid #00eaff;
+  border-radius: 12px;
+}
+
+/* BUTTON */
+button {
+  padding: 12px 24px;
+  background: #00eaff;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+/* GAME OVER */
+#gameOverUI {
+  margin-top: 20vh;
+}
+
+.hidden {
+  display: none;
+}
