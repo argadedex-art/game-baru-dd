@@ -2,34 +2,32 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Space Shooter Clean</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Catch Fruit Game</title>
+
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+<!-- MENU START -->
 <div id="menu">
-  <h1>🚀 SPACE SHOOTER</h1>
+  <h1>🍓 Catch Fruit</h1>
   <button onclick="startGame()">START</button>
 </div>
 
+<!-- HUD -->
 <div id="hud">
-  <div id="info"></div>
-  <div id="hpBar"><div id="hpFill"></div></div>
+  Score: <span id="score">0</span>
 </div>
 
-<canvas id="gameCanvas"></canvas>
-
-<!-- JOYSTICK -->
-<div id="joystick">
-  <div id="stick"></div>
-</div>
-
-<div id="gameOverUI" class="hidden">
+<!-- GAME OVER -->
+<div id="gameOver">
   <h1>💀 GAME OVER</h1>
-  <button onclick="restartGame()">RESTART</button>
+  <button onclick="startGame()">RESTART</button>
 </div>
+
+<canvas id="game"></canvas>
 
 <script src="script.js"></script>
 
