@@ -1,158 +1,111 @@
-const canvas = document.getElementById("gameCanvas");
+const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+canvas.width = 320;
+canvas.height = 400;
+
 const menu = document.getElementById("menu");
-const gameOverUI = document.getElementById("gameOverUI");
-const hpFill = document.getElementById("hpFill");
-const info = document.getElementById("info");
+const hud = document.getElementById("hud");
+const gameOverUI = document.getElementById("gameOver");
 
-const joystick = document.getElementById("joystick");
-const stick = document.getElementById("stick");
+let player, fruit, score, running = false;
 
-canvas.width = 400;
-canvas.height = 600;
-
-/* STATE */
-let player, bullets, enemies;
-let gameState = "menu";
-let score = 0;
-
-/* JOYSTICK */
-let joyX = 0;
-
-/* ENEMY VARIATION */
-const enemyTypes = [
-  {emoji:"👾", speed:2},
-  {emoji:"👽", speed:3},
-  {emoji:"🤖", speed:1.5},
-  {emoji:"🛸", speed:2.5}
-];
-
-/* START */
+/* START GAME */
 function startGame(){
+
   menu.style.display = "none";
+  gameOverUI.style.display = "none";
+  hud.style.display = "block";
   canvas.style.display = "block";
-  joystick.style.display = "block";
 
-  resetGame();
-}
-
-/* RESET */
-function resetGame(){
-  player = {x:200,y:520,hp:5};
-  bullets = [];
-  enemies = [];
+  player = { x: 140, y: 360, w: 40, h: 10 };
+  fruit = spawnFruit();
   score = 0;
-  gameState = "play";
+  running = true;
 
-  shootLoop();
-  loop();
+  updateScore();
 }
 
-/* RESTART */
-function restartGame(){
-  resetGame();
-  gameOverUI.classList.add("hidden");
+/* SCORE */
+function updateScore(){
+  document.getElementById("score").innerText = score;
 }
 
-/* JOYSTICK */
-joystick.addEventListener("touchmove",(e)=>{
-  if(gameState !== "play") return;
-
-  e.preventDefault();
-
-  let r = joystick.getBoundingClientRect();
-  let x = e.touches[0].clientX - r.left - 60;
-
-  if(x > 40) x = 40;
-  if(x < -40) x = -40;
-
-  joyX = x;
-
-  stick.style.transform = `translate(${x}px,0px)`;
-},{passive:false});
-
-/* SHOOT */
-function shootLoop(){
-  if(gameState !== "play") return;
-
-  bullets.push({x:player.x,y:player.y});
-  setTimeout(shootLoop,250);
-}
-
-/* ENEMY SPAWN (FIX VARIASI) */
-setInterval(()=>{
-  if(gameState !== "play") return;
-
-  let t = enemyTypes[Math.floor(Math.random()*enemyTypes.length)];
-
-  enemies.push({
-    x: Math.random()*380,
+/* FRUIT */
+function spawnFruit(){
+  return {
+    x: Math.random() * (canvas.width - 20),
     y: -20,
-    speed: t.speed,
-    emoji: t.emoji,
-    dir: Math.random()>0.5?1:-1
-  });
+    size: 20,
+    speed: 3
+  };
+}
 
-},600);
+/* =========================
+   CONTROL PALING STABIL
+   ========================= */
 
-/* LOOP */
-function loop(){
-  if(gameState !== "play") return;
+function movePlayer(clientX){
+  let rect = canvas.getBoundingClientRect();
+  let x = clientX - rect.left;
 
-  ctx.clearRect(0,0,400,600);
+  player.x = x - player.w / 2;
+}
 
-  /* PLAYER MOVE */
-  player.x += joyX * 0.15;
-  if(player.x < 20) player.x = 20;
-  if(player.x > 380) player.x = 380;
+/* HP */
+canvas.addEventListener("touchmove", e=>{
+  movePlayer(e.touches[0].clientX);
+}, {passive:true});
+
+/* PC */
+canvas.addEventListener("mousemove", e=>{
+  movePlayer(e.clientX);
+});
+
+/* ========================= */
+
+function gameLoop(){
+
+  if(!running) return;
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
   /* PLAYER */
-  ctx.font = "30px Arial";
-  ctx.fillText("😎", player.x, player.y);
+  ctx.fillStyle = "#00eaff";
+  ctx.fillRect(player.x, player.y, player.w, player.h);
 
-  /* BULLET */
-  bullets.forEach((b,i)=>{
-    b.y -= 6;
-    ctx.fillText("🏐", b.x, b.y);
-    if(b.y < 0) bullets.splice(i,1);
-  });
+  /* FRUIT */
+  fruit.y += fruit.speed;
 
-  /* ENEMY */
-  enemies.forEach((e,ei)=>{
-    e.y += e.speed;
-    e.x += e.dir * 2;
+  ctx.fillStyle = "red";
+  ctx.beginPath();
+  ctx.arc(fruit.x, fruit.y, fruit.size/2, 0, Math.PI*2);
+  ctx.fill();
 
-    ctx.font = "28px Arial";
-    ctx.fillText(e.emoji, e.x, e.y);
+  /* COLLECT */
+  if(
+    fruit.y > player.y &&
+    fruit.x > player.x &&
+    fruit.x < player.x + player.w
+  ){
+    score++;
+    updateScore();
+    fruit = spawnFruit();
+  }
 
-    /* HIT PLAYER */
-    if(Math.abs(e.x-player.x)<20 && Math.abs(e.y-player.y)<20){
-      enemies.splice(ei,1);
-      player.hp--;
+  /* MISS → GAME OVER */
+  if(fruit.y > canvas.height){
+    running = false;
+    gameOverUI.style.display = "block";
+  }
 
-      if(player.hp <= 0) endGame();
-    }
+  requestAnimationFrame(gameLoop);
+}
 
-    /* HIT BULLET */
-    bullets.forEach((b,bi)=>{
-      if(Math.abs(b.x-e.x)<20 && Math.abs(b.y-e.y)<20){
-        enemies.splice(ei,1);
-        bullets.splice(bi,1);
-        score++;
-      }
-    });
-  });
-
-  /* UI */
-  hpFill.style.width = (player.hp/5)*100 + "%";
-  info.innerText = "Score: " + score;
-
+/* AUTO START LOOP (TAPI WAIT START BUTTON) */
+function loop(){
+  gameLoop();
   requestAnimationFrame(loop);
 }
 
-/* GAME OVER */
-function endGame(){
-  gameState = "gameover";
-  gameOverUI.classList.remove("hidden");
-}
+loop();
